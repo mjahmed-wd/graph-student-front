@@ -1,5 +1,5 @@
 export const queryFetch = (graphQuery) => {
-    return fetch("http://localhost:4000/graphql", {
+    return fetch("https://graph-student-mjahmed.herokuapp.com/graphql", {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({

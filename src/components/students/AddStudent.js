@@ -10,7 +10,7 @@ import "react-datepicker/dist/react-datepicker.css";
 
 const animatedComponents = makeAnimated();
 
-const AddStudent = () => {
+const AddStudent = ({ setSubjectCount }) => {
   const initData = {
     studentName: "",
     email: "",
@@ -78,15 +78,28 @@ const AddStudent = () => {
   }`).then((data) => setSubjectOptions(data.data.getAllSubjects));
   }, []);
 
-  const getubjectSummaryCount=(students)=>{
-    const counts={}
+  const getSubjectSummaryCount = (students) => {
+    const counts = {};
     const temp = [];
     students.map((item) =>
       item.takenSubjects.forEach((sub) => temp.push(sub.label))
     );
-    temp.forEach(function (x) { counts[x] = (counts[x] || 0) + 1; })
-    return counts;
-  }
+    temp.forEach(function (x) {
+      counts[x] = (counts[x] || 0) + 1;
+    });
+    // return counts;
+    const result = Object.entries(counts).forEach(([keys, values]) => ({
+      subject: keys,
+      count: values,
+    }))
+    console.log(result)
+    setSubjectCount(result);
+  };
+
+  useEffect(() => {
+    getSubjectSummaryCount(students);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [students]);
   return (
     <div>
       <button className="btn primary" onClick={() => fetchAllStudents()}>

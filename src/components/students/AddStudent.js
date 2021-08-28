@@ -1,14 +1,31 @@
-import React, { useEffect, useState, Component } from "react";
+import React, { useEffect, useState } from "react";
 import { ErrorMessage, Field, Formik } from "formik";
 import { Form } from "react-bootstrap";
-import { queryFetch } from "../../helper/graphqlQuery";
+import {
+  deleteSingleStudent,
+  fetchAllStudents,
+  getSubjectSummaryCount,
+  queryFetch,
+  saveNewStudent,
+  updateSingleStudent,
+} from "../../helper/graphqlQuery";
+import * as yup from "yup";
 import Select from "react-select";
 import makeAnimated from "react-select/animated";
 import { Modal } from "react-bootstrap";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import moment from "moment";
+import StudentList from "./StudentList";
 
 const animatedComponents = makeAnimated();
+
+let schema = yup.object().shape({
+  // studentName:  yup.string().required(),
+  // email: yup.string().email().required(),
+  // phone: yup.string().required(),
+  // dateOfBirth: yup.date().required(),
+});
 
 const AddStudent = ({ setSubjectCount }) => {
   const initData = {
@@ -23,51 +40,9 @@ const AddStudent = ({ setSubjectCount }) => {
   const [students, setStudents] = useState([]);
   const [modalShow, setModalShow] = useState(false);
   const [modalData, setModalData] = useState({});
-  const fetchAllStudents = () => {
-    queryFetch(`query{
-        getAllStudent{
-          id
-          name
-          email
-          phone
-          dateOfBirth
-          takenSubjects{
-            value
-            label
-          }
-        }
-        }`).then((data) => setStudents(data.data.getAllStudent));
-  };
 
-  const saveNewStudent = (values) => {
-    const stringifySubject = values.takenSubjects.map(
-      (item) => `{value:"${item.value}", label:"${item.label}"},`
-    );
-    queryFetch(`
-    mutation{
-        createStudent(student:{ name: "${values.studentName}"
-          email: "${values.email}",phone:"${values.phone}", dateOfBirth:"${values.dateOfBirth}",
-          takenSubjects:[${stringifySubject}]}){
-         name
-          takenSubjects{
-            label
-          }
-        }
-      }
-      `).then((data) => console.log("saved data for ", data));
-  };
-
-  const deleteSingleStudent = (studentId) => {
-    queryFetch(`
-      mutation{
-        deleteStudent(id:"${studentId}")
-      }
-      `).then((data) => {
-      console.log(data);
-      fetchAllStudents();
-    });
-  };
   useEffect(() => {
+    fetchAllStudents(setStudents);
     //   subject query for options
     queryFetch(`query{
     getAllSubjects{
@@ -78,35 +53,15 @@ const AddStudent = ({ setSubjectCount }) => {
   }`).then((data) => setSubjectOptions(data.data.getAllSubjects));
   }, []);
 
-  const getSubjectSummaryCount = (students) => {
-    const counts = {};
-    const temp = [];
-    students.map((item) =>
-      item.takenSubjects.forEach((sub) => temp.push(sub.label))
-    );
-    temp.forEach(function (x) {
-      counts[x] = (counts[x] || 0) + 1;
-    });
-    // return counts;
-    const result = Object.entries(counts).forEach(([keys, values]) => ({
-      subject: keys,
-      count: values,
-    }))
-    console.log(result)
-    setSubjectCount(result);
-  };
-
   useEffect(() => {
-    getSubjectSummaryCount(students);
+    getSubjectSummaryCount(students, setSubjectCount);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [students]);
   return (
     <div>
-      <button className="btn primary" onClick={() => fetchAllStudents()}>
-        Get all Student and subjects taken
-      </button>
       <Formik
         initialValues={initData}
+        validationSchema={schema}
         onSubmit={(values, { setSubmitting }) => {
           console.log(values);
         }}
@@ -119,6 +74,8 @@ const AddStudent = ({ setSubjectCount }) => {
           handleBlur,
           handleSubmit,
           isSubmitting,
+          dirty,
+          isValid,
           setFieldValue,
           /* and other goodies */
         }) => (
@@ -127,7 +84,7 @@ const AddStudent = ({ setSubjectCount }) => {
             <ErrorMessage name="studentName" component="div" />
             <Field type="email" name="email" />
             <ErrorMessage name="email" component="div" />
-            <Field type="number" name="phone" />
+            <Field type="text" name="phone" />
             <ErrorMessage name="phone" component="div" />
             {/* <Field type="dateOfBirth" name="dateOfBirth" /> */}
             <DatePicker
@@ -145,13 +102,28 @@ const AddStudent = ({ setSubjectCount }) => {
               options={subjectOptions}
               onChange={(v) => setFieldValue("takenSubjects", v)}
             />
-            <button type="button" onClick={() => saveNewStudent(values)}>
+            <button
+              type="button"
+              disabled={!dirty || !isValid}
+              onClick={() =>
+                saveNewStudent(values, fetchAllStudents, setStudents)
+              }
+            >
               Submit
             </button>
           </Form>
         )}
       </Formik>
-
+      <StudentList
+        students={students}
+        propsObj={{
+          fetchAllStudents,
+          setStudents,
+          deleteSingleStudent,
+          setModalShow,
+          setModalData,
+        }}
+      />
       <table>
         <thead>
           <tr>
@@ -172,7 +144,7 @@ const AddStudent = ({ setSubjectCount }) => {
                 <td>{item.name}</td>
                 <td>{item.email}</td>
                 <td>{item.phone}</td>
-                <td>{item.dateOfBirth}</td>
+                <td>{moment(item.dateOfBirth).format("MMM Do YY")}</td>
                 <td>{item.takenSubjects.map((sub) => `- ${sub.label} `)}</td>
                 <td>
                   <button
@@ -183,7 +155,15 @@ const AddStudent = ({ setSubjectCount }) => {
                   >
                     Edit
                   </button>
-                  <button onClick={() => deleteSingleStudent(item.id)}>
+                  <button
+                    onClick={() =>
+                      deleteSingleStudent(
+                        item.id,
+                        fetchAllStudents,
+                        setStudents
+                      )
+                    }
+                  >
                     Delete
                   </button>
                 </td>
@@ -196,6 +176,7 @@ const AddStudent = ({ setSubjectCount }) => {
         subjects={subjectOptions}
         show={modalShow}
         fetchAllStudents={fetchAllStudents}
+        setStudents={setStudents}
         onHide={() => setModalShow(false)}
       />
     </div>
@@ -204,36 +185,7 @@ const AddStudent = ({ setSubjectCount }) => {
 
 function MydModalWithGrid(props) {
   const { name, takenSubjects } = props.student;
-
-  console.log(name);
-
-  const updateSingleStudent = (values) => {
-    const stringifySubject = values.takenSubjects.map(
-      (item) => `{value:"${item.value}", label:"${item.label}"},`
-    );
-    queryFetch(`
-      mutation{
-        updateStudent(id:"${values.id}",student:{
-              name:"${values.name}",
-              email: "${values.email}",
-              phone: "${values.phone}",
-              dateOfBirth: "${values.dateOfBirth}",
-              takenSubjects: [${stringifySubject}]
-            })
-        {
-          name
-          takenSubjects{
-            value
-            label
-          }
-        }
-      }
-      `).then((data) => {
-      console.log(data);
-      props.fetchAllStudents();
-      props.onHide();
-    });
-  };
+  const { setStudents, fetchAllStudents, onHide } = props;
 
   return (
     <Modal
@@ -250,14 +202,17 @@ function MydModalWithGrid(props) {
       <Modal.Body>
         <Formik
           initialValues={props.student}
+          validationSchema={schema}
           onSubmit={(values, { setSubmitting }) => {
-            console.log(values);
+            // console.log(values);
           }}
         >
           {({
             values,
             errors,
             touched,
+            dirty,
+            isValid,
             handleChange,
             handleBlur,
             handleSubmit,
@@ -266,13 +221,18 @@ function MydModalWithGrid(props) {
             /* and other goodies */
           }) => (
             <Form>
-              <Field type="name" name="name" />
+              <Field type="text" name="name" />
               <ErrorMessage name="name" component="div" />
               <Field type="email" name="email" />
               <ErrorMessage name="email" component="div" />
-              <Field type="phone" name="phone" />
+              <Field type="text" name="phone" />
               <ErrorMessage name="phone" component="div" />
-              <Field type="dateOfBirth" name="dateOfBirth" />
+              <DatePicker
+                name="dateOfBirth"
+                selected={new Date(values.dateOfBirth)}
+                placeholder="Select Date"
+                onChange={(date) => setFieldValue("dateOfBirth", date)}
+              />
               <ErrorMessage name="dateOfBirth" component="div" />
               <Select
                 closeMenuOnSelect={false}
@@ -282,7 +242,18 @@ function MydModalWithGrid(props) {
                 options={props.subjects}
                 onChange={(v) => setFieldValue("takenSubjects", v)}
               />
-              <button type="button" onClick={() => updateSingleStudent(values)}>
+              <button
+                type="button"
+                disabled={!dirty || !isValid}
+                onClick={() =>
+                  updateSingleStudent(
+                    values,
+                    fetchAllStudents,
+                    setStudents,
+                    onHide
+                  )
+                }
+              >
                 Submit
               </button>
             </Form>

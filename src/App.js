@@ -20,7 +20,9 @@ function App() {
       >
         <Tab eventKey="dashboard" title="Dashboard">
           Dashboard Report
-          <PieChart subjectCount={subjectCount} />
+          {
+            subjectCount!==null && <PieChart subjectCount={subjectCount} />
+          }
           {/* {subjectCount !== null &&
             Object.entries(subjectCount).forEach(([keys, values]) =>
               console.log({ subject: keys, count: keys })

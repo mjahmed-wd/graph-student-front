@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { ErrorMessage, Field, Formik } from "formik";
 import { Form } from "react-bootstrap";
-import { queryFetch } from "../../helper/graphqlQuery";
+import { createSubject, deleteSubject, fetchAllSubject, queryFetch } from "../../helper/graphqlQuery";
 const AddSubject = () => {
   const initData = {
     // value: "",
@@ -11,34 +11,9 @@ const AddSubject = () => {
 
   useEffect(() => {
     //   subject query for options
-    queryFetch(`query{
-        getAllSubjects{
-          id
-          value
-          label
-        }
-      }`).then((data) => setSubjectOptions(data.data.getAllSubjects));
+    fetchAllSubject(setSubjectOptions)
   }, []);
 
-const createSubject=(values)=>{
-queryFetch(`
-mutation{
-    createSubject(subject: {
-      value: "${subjectOptions.length+1}",
-      label: "${values.label}"
-    }){
-      label
-    }
-  }
-`).then(data=>console.log(data))
-}
-  const deleteSubject=(subjectId)=>{
-      queryFetch(`
-      mutation{
-        deleteSubject(id:"${subjectId}")
-      }
-      `).then(data=>console.log(data))
-  }
   return (
     <div>
       <Formik
@@ -64,7 +39,7 @@ mutation{
             <Field type="label" name="label" />
             <ErrorMessage name="label" component="div" />
 
-            <button type="button" onClick={() => createSubject(values)}>
+            <button type="button" onClick={() => createSubject(values,subjectOptions,fetchAllSubject ,setSubjectOptions)}>
               Submit
             </button>
           </Form>
@@ -81,7 +56,7 @@ mutation{
               <tr>
                 <td>{item.label}</td>
                 <td>
-                  <button onClick={()=>deleteSubject(item.id)}>Delete</button>
+                  <button onClick={()=>deleteSubject(item.id,fetchAllSubject ,setSubjectOptions)}>Delete</button>
                 </td>
               </tr>
             ))}

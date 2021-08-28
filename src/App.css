@@ -1,3 +1,9 @@
+.date_field {
+  border-radius: 25px;
+  border: 1px solid lightgray;
+  padding: 10px 20px;
+}
+
 .App {
   text-align: center;
 }

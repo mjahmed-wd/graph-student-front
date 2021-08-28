@@ -17,17 +17,21 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import moment from "moment";
 import StudentList from "./StudentList";
+import FormikInput from "../../helper/_inputField";
+import { Button } from "@material-ui/core";
+import { useGithubBtnStyles } from "@mui-treasury/styles/button/github";
 
 const animatedComponents = makeAnimated();
 
 let schema = yup.object().shape({
-  // studentName:  yup.string().required(),
-  // email: yup.string().email().required(),
-  // phone: yup.string().required(),
-  // dateOfBirth: yup.date().required(),
+  studentName: yup.string().required(),
+  email: yup.string().email().required(),
+  phone: yup.string().required(),
+  dateOfBirth: yup.date().required(),
 });
 
 const AddStudent = ({ setSubjectCount }) => {
+  const styles = useGithubBtnStyles();
   const initData = {
     studentName: "",
     email: "",
@@ -80,37 +84,65 @@ const AddStudent = ({ setSubjectCount }) => {
           /* and other goodies */
         }) => (
           <Form>
-            <Field type="text" name="studentName" />
-            <ErrorMessage name="studentName" component="div" />
-            <Field type="email" name="email" />
-            <ErrorMessage name="email" component="div" />
-            <Field type="text" name="phone" />
-            <ErrorMessage name="phone" component="div" />
-            {/* <Field type="dateOfBirth" name="dateOfBirth" /> */}
-            <DatePicker
-              name="dateOfBirth"
-              selected={values.dateOfBirth}
-              placeholder="Select Date"
-              onChange={(date) => setFieldValue("dateOfBirth", date)}
-            />
-            <ErrorMessage name="dateOfBirth" component="div" />
-            <Select
-              closeMenuOnSelect={false}
-              components={animatedComponents}
-              defaultValue={[subjectOptions[0]]}
-              isMulti
-              options={subjectOptions}
-              onChange={(v) => setFieldValue("takenSubjects", v)}
-            />
-            <button
-              type="button"
-              disabled={!dirty || !isValid}
-              onClick={() =>
-                saveNewStudent(values, fetchAllStudents, setStudents)
-              }
-            >
-              Submit
-            </button>
+            <div className="d-flex justify-content-center m-3">
+              <div className="w-25 text-center">
+                <FormikInput
+                  type="text"
+                  name="studentName"
+                  placeholder="Student"
+                  onClick={(e) => setFieldValue("studentName", e.target.value)}
+                />
+                <ErrorMessage name="studentName" component="div" />
+                <FormikInput
+                  type="email"
+                  placeholder="Email"
+                  name="email"
+                  onClick={(e) => setFieldValue("email", e.target.value)}
+                />
+                <ErrorMessage name="email" component="div" />
+                <FormikInput
+                  type="text"
+                  placeholder="Phone"
+                  name="phone"
+                  onClick={(e) => setFieldValue("phone", e.target.value)}
+                />
+                <ErrorMessage name="phone" component="div" />
+                {/* <Field type="dateOfBirth" name="dateOfBirth" /> */}
+                <div className="m-2">
+                  <DatePicker
+                    name="dateOfBirth"
+                    selected={values.dateOfBirth}
+                    placeholder="Select Date"
+                    className="date_field"
+                    onChange={(date) => setFieldValue("dateOfBirth", date)}
+                  />
+                  <ErrorMessage name="dateOfBirth" component="div" />
+                </div>
+                <div className="m-2">
+                  <Select
+                    closeMenuOnSelect={false}
+                    components={animatedComponents}
+                    defaultValue={[subjectOptions[0]]}
+                    isMulti
+                    options={subjectOptions}
+                    onChange={(v) => setFieldValue("takenSubjects", v)}
+                  />
+                </div>
+                <div className="mb-2">
+                  <Button
+                    classes={styles}
+                    variant={"contained"}
+                    color={"primary"}
+                    disabled={!dirty || !isValid}
+                    onClick={() =>
+                      saveNewStudent(values, fetchAllStudents, setStudents)
+                    }
+                  >
+                    Submit
+                  </Button>
+                </div>
+              </div>
+            </div>
           </Form>
         )}
       </Formik>
@@ -124,53 +156,6 @@ const AddStudent = ({ setSubjectCount }) => {
           setModalData,
         }}
       />
-      <table>
-        <thead>
-          <tr>
-            <th>SL</th>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Phone</th>
-            <th>Date of Birth</th>
-            <th>Subjects Taken</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {students.length > 0 &&
-            students.map((item, index) => (
-              <tr key={index}>
-                <td>{index + 1}</td>
-                <td>{item.name}</td>
-                <td>{item.email}</td>
-                <td>{item.phone}</td>
-                <td>{moment(item.dateOfBirth).format("MMM Do YY")}</td>
-                <td>{item.takenSubjects.map((sub) => `- ${sub.label} `)}</td>
-                <td>
-                  <button
-                    onClick={() => {
-                      setModalShow(true);
-                      setModalData(item);
-                    }}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() =>
-                      deleteSingleStudent(
-                        item.id,
-                        fetchAllStudents,
-                        setStudents
-                      )
-                    }
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
-        </tbody>
-      </table>
       <MydModalWithGrid
         student={modalData}
         subjects={subjectOptions}

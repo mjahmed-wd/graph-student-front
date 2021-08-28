@@ -1,8 +1,21 @@
 import React, { useEffect, useState } from "react";
 import { ErrorMessage, Field, Formik } from "formik";
 import { Form } from "react-bootstrap";
-import { createSubject, deleteSubject, fetchAllSubject, queryFetch } from "../../helper/graphqlQuery";
+import {
+  createSubject,
+  deleteSubject,
+  fetchAllSubject,
+  queryFetch,
+} from "../../helper/graphqlQuery";
+import SubjectList from "./SubjectList";
+import FormikInput from "../../helper/_inputField";
+import Button from "@material-ui/core/Button";
+import { useGithubBtnStyles } from "@mui-treasury/styles/button/github";
+import { usePushingGutterStyles } from "@mui-treasury/styles/gutter/pushing";
+
 const AddSubject = () => {
+  const styles = useGithubBtnStyles();
+  const gutterStyles = usePushingGutterStyles();
   const initData = {
     // value: "",
     label: "",
@@ -11,7 +24,7 @@ const AddSubject = () => {
 
   useEffect(() => {
     //   subject query for options
-    fetchAllSubject(setSubjectOptions)
+    fetchAllSubject(setSubjectOptions);
   }, []);
 
   return (
@@ -36,32 +49,59 @@ const AddSubject = () => {
           <Form>
             {/* <Field type="value" name="value" />
             <ErrorMessage name="value" component="div" /> */}
-            <Field type="label" name="label" />
-            <ErrorMessage name="label" component="div" />
-
-            <button type="button" onClick={() => createSubject(values,subjectOptions,fetchAllSubject ,setSubjectOptions)}>
+            <div className="d-flex justify-content-center">
+              <div>
+                <FormikInput
+                  type="label"
+                  name="label"
+                  placeholder="Subject Name"
+                  onChange={(e) => setFieldValue("label", e?.target?.value)}
+                />
+                <ErrorMessage name="label" component="div" />
+              </div>
+              <div className={gutterStyles.parent}>
+                <Button
+                  classes={styles}
+                  variant={"contained"}
+                  color={"primary"}
+                  onClick={() =>
+                    createSubject(
+                      values,
+                      subjectOptions,
+                      fetchAllSubject,
+                      setSubjectOptions
+                    )
+                  }
+                >
+                  Submit
+                </Button>
+              </div>
+            </div>
+            {/* <button
+              type="button"
+              onClick={() =>
+                createSubject(
+                  values,
+                  subjectOptions,
+                  fetchAllSubject,
+                  setSubjectOptions
+                )
+              }
+            >
               Submit
-            </button>
+            </button> */}
           </Form>
         )}
       </Formik>
       {subjectOptions.length > 0 && (
-        <table>
-          <thead>
-            <th>Subject Name</th>
-            <th>Action</th>
-          </thead>
-          <tbody>
-            {subjectOptions.map((item) => (
-              <tr>
-                <td>{item.label}</td>
-                <td>
-                  <button onClick={()=>deleteSubject(item.id,fetchAllSubject ,setSubjectOptions)}>Delete</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <SubjectList
+          subjectOptions={subjectOptions}
+          objProps={{
+            deleteSubject,
+            fetchAllSubject,
+            setSubjectOptions,
+          }}
+        />
       )}
     </div>
   );

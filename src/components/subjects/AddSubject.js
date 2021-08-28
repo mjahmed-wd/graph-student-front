@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { ErrorMessage, Field, Formik } from "formik";
+import { ErrorMessage, Formik } from "formik";
 import { Form } from "react-bootstrap";
 import {
   createSubject,
   deleteSubject,
   fetchAllSubject,
-  queryFetch,
 } from "../../helper/graphqlQuery";
 import SubjectList from "./SubjectList";
 import FormikInput from "../../helper/_inputField";

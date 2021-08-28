@@ -15,7 +15,6 @@ import makeAnimated from "react-select/animated";
 import { Modal } from "react-bootstrap";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import moment from "moment";
 import StudentList from "./StudentList";
 import FormikInput from "../../helper/_inputField";
 import { Button } from "@material-ui/core";

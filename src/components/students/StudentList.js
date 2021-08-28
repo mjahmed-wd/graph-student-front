@@ -14,7 +14,6 @@ import { useContainedCardHeaderStyles } from "@mui-treasury/styles/cardHeader/co
 import { useSoftRiseShadowStyles } from "@mui-treasury/styles/shadow/softRise";
 import { useFadedShadowStyles } from "@mui-treasury/styles/shadow/faded";
 import { useBlogTextInfoContentStyles } from "@mui-treasury/styles/textInfoContent/blog";
-import { useOverShadowStyles } from "@mui-treasury/styles/shadow/over";
 import { useGraphicBtnStyles } from "@mui-treasury/styles/button/graphic";
 import { Button } from "@material-ui/core";
 
@@ -60,9 +59,8 @@ export const StudentList = React.memo(function ElevatedHeaderCard({
   const cardHeaderStyles = useContainedCardHeaderStyles();
   const cardShadowStyles = useSoftRiseShadowStyles({ inactive: true });
   const cardHeaderShadowStyles = useFadedShadowStyles();
-  const { button: buttonStyles, ...contentStyles } =
+  const { button: buttonStyles } =
     useBlogTextInfoContentStyles();
-  const shadowStyles = useOverShadowStyles();
   return (
     <div className="d-flex justify-content-center">
       <div className="w-75">

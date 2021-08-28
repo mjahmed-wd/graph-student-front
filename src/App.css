@@ -1,7 +1,8 @@
-.date_field {
+.date_field, input {
   border-radius: 25px;
   border: 1px solid lightgray;
   padding: 10px 20px;
+  margin: 5px 5px;
 }
 
 .App {

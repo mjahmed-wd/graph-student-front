@@ -16,7 +16,6 @@ import { Modal } from "react-bootstrap";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import StudentList from "./StudentList";
-import FormikInput from "../../helper/_inputField";
 import { Button } from "@material-ui/core";
 import { useGithubBtnStyles } from "@mui-treasury/styles/button/github";
 
@@ -26,7 +25,7 @@ let schema = yup.object().shape({
   studentName: yup.string().required(),
   email: yup.string().email().required(),
   phone: yup.string().required(),
-  dateOfBirth: yup.date().required(),
+  dateOfBirth: yup.string().required(),
 });
 
 const AddStudent = ({ setSubjectCount }) => {
@@ -83,23 +82,24 @@ const AddStudent = ({ setSubjectCount }) => {
           /* and other goodies */
         }) => (
           <Form>
+            {console.log(errors)}
             <div className="d-flex justify-content-center m-3">
               <div className="w-25 text-center">
-                <FormikInput
+                <Field
                   type="text"
                   name="studentName"
                   placeholder="Student"
                   onClick={(e) => setFieldValue("studentName", e.target.value)}
                 />
                 <ErrorMessage name="studentName" component="div" />
-                <FormikInput
+                <Field
                   type="email"
                   placeholder="Email"
                   name="email"
                   onClick={(e) => setFieldValue("email", e.target.value)}
                 />
                 <ErrorMessage name="email" component="div" />
-                <FormikInput
+                <Field
                   type="text"
                   placeholder="Phone"
                   name="phone"
@@ -127,6 +127,7 @@ const AddStudent = ({ setSubjectCount }) => {
                     onChange={(v) => setFieldValue("takenSubjects", v)}
                   />
                 </div>
+                {console.log(dirty,isValid)}
                 <div className="mb-2">
                   <Button
                     classes={styles}
@@ -228,6 +229,7 @@ function MydModalWithGrid(props) {
               />
               <button
                 type="button"
+                className="btn btn-primary m-2"
                 disabled={!dirty || !isValid}
                 onClick={() =>
                   updateSingleStudent(
@@ -245,7 +247,7 @@ function MydModalWithGrid(props) {
         </Formik>
       </Modal.Body>
       <Modal.Footer>
-        <button onClick={props.onHide}>Close</button>
+        <button className="btn btn-primary m-2" onClick={props.onHide}>Close</button>
       </Modal.Footer>
     </Modal>
   );

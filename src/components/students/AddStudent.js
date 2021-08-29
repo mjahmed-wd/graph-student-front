@@ -28,6 +28,13 @@ let schema = yup.object().shape({
   dateOfBirth: yup.string().required(),
 });
 
+let editSchema = yup.object().shape({
+  name: yup.string().required(),
+  email: yup.string().email().required(),
+  phone: yup.string().required(),
+  dateOfBirth: yup.string().required(),
+});
+
 const AddStudent = ({ setSubjectCount }) => {
   const styles = useGithubBtnStyles();
   const initData = {
@@ -187,7 +194,7 @@ function MydModalWithGrid(props) {
       <Modal.Body>
         <Formik
           initialValues={props.student}
-          validationSchema={schema}
+          validationSchema={editSchema}
           onSubmit={(values, { setSubmitting }) => {
             // console.log(values);
           }}
